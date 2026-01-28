@@ -8,7 +8,6 @@ export const Energy = () => {
         name="energy"
         maxCount={200}
         autoStart={false}
-        position={[0, 0, 0]}
         intensity={10}
         size={[0.01, 0.07]}
         fadeSize={[1, 0]}
@@ -31,8 +30,6 @@ export const Energy = () => {
           [-1, 1],
           [-0.3, 0.3],
         ]}
-        rotation={[0, 0]}
-        rotationSpeed={[0, 0]}
         appearance="gradient"
         blending={2}
         lighting="basic"

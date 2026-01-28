@@ -15,17 +15,13 @@ export const Dodge = () => {
                 fadeSize={[1, 1]}
                 colorStart={["#63acff"]}
                 fadeOpacity={[0.01, 0]}
-                gravity={[0, 0, 0]}
-                speed={[0, 0]}
+  
                 lifetime={[0.3, 0.3]}
                 friction={{
                     intensity: 0,
                     easing: "linear"
                 }}
                 direction={[[-1, 1], [0, 1], [-1, 1]]}
-                startPosition={[[0, 0], [0, 0], [0, 0]]}
-                rotation={[0, 0]}
-                rotationSpeed={[0, 0]}
                 appearance="gradient"
                 blending={1}
                 lighting="basic"

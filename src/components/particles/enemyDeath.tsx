@@ -30,6 +30,7 @@ export const EnemyDeath = () => {
   return (
     <>
       <VFXParticles
+        curveTexturePath="./vfx/death.bin"
         name="death"
         autoStart={false}
         maxParticles={1000}
@@ -44,18 +45,6 @@ export const EnemyDeath = () => {
         gravity={[0, -15, 0]}
         speed={[0, 4.47]}
         lifetime={[1, 3]}
-        velocityCurve={{
-          points: [
-            {
-              pos: [0, 1],
-              handleOut: [0.33, 0],
-            },
-            {
-              pos: [1, 0.1545880126953125],
-              handleIn: [-0.33, 0],
-            },
-          ],
-        }}
         direction={[
           [-1, 1],
           [-1, 1],
@@ -87,52 +76,27 @@ export const EnemyDeath = () => {
         }}
       />
       <VFXParticles
+        curveTexturePath="./vfx/death-2.bin"
         name="death-2"
         autoStart={false}
         geometry={new PlaneGeometry(1, 1, 1, 1)}
         maxParticles={10}
-        position={[0, 0, 0]}
         delay={1}
         size={5}
         fadeSize={[1, 0]}
-        fadeSizeCurve={{
-          points: [
-            {
-              pos: [0, 0],
-              handleOut: [0.21773937321320794, 0.4127827096096921],
-            },
-            {
-              pos: [1, 1],
-              handleIn: [-0.5943960000000001, 7.279251588259904e-17],
-            },
-          ],
-        }}
         colorStart={['#ffffff']}
         fadeOpacity={[1, 0]}
-        gravity={[0, 0, 0]}
-        speed={[0, 0]}
         lifetime={0.3}
         friction={{
           intensity: 0,
           easing: 'linear',
         }}
-        direction={[
-          [0, 0],
-          [0, 0],
-          [0, 0],
-        ]}
-        startPosition={[
-          [0, 0],
-          [0, 0],
-          [0, 0],
-        ]}
         emitCount={1}
         rotation={[
           [-Math.PI / 2, -Math.PI / 2],
           [0, 0],
           [0, 0],
         ]}
-        rotationSpeed={[0, 0]}
         appearance="gradient"
         blending={2}
         lighting="basic"
