@@ -23,7 +23,7 @@ import { updateEnemySystems } from './systems'
 import { Healthbar } from '@/components/hud/healthbar'
 import { useCollisionStore, Layer } from '@/collision'
 import type { HitPosition } from '@/collision'
-import { useVFXEmitter } from 'r3f-vfx'
+import { useVFXEmitter, PARTICLES } from '@/components/particles'
 import { useGameStore } from '@/store'
 import { createEnemyCapsMaterial } from './material'
 import { damp } from 'three/src/math/MathUtils.js'
@@ -89,9 +89,9 @@ export function EnemyMesh({ entity }: EnemyMeshProps) {
   const unregisterCollider = useCollisionStore((s) => s.unregisterCollider)
   const updateCollider = useCollisionStore((s) => s.updateCollider)
 
-  const { emit } = useVFXEmitter('impact')
-  const { emit: emitFlare } = useVFXEmitter('impact-flare')
-  const { emit: emitSpawn } = useVFXEmitter('spawn')
+  const { emit } = useVFXEmitter(PARTICLES.IMPACT)
+  const { emit: emitFlare } = useVFXEmitter(PARTICLES.IMPACT_FLARE)
+  const { emit: emitSpawn } = useVFXEmitter(PARTICLES.SPAWN)
 
   // Reactively subscribe to trait changes
   const position = useTrait(entity, Position)
@@ -200,11 +200,18 @@ export function EnemyMesh({ entity }: EnemyMeshProps) {
 
   // Handle hit from player sword
   const onHit = useCallback(
-    (_attackerId: string, damage: number, hitPosition: HitPosition) => {
+    (attackerId: string, damage: number, hitPosition: HitPosition) => {
       console.log(`🗡️ Enemy ${entity.id()} hit for ${damage} damage at`, hitPosition)
       const { x, y, z } = hitPosition
-      damageEnemy(entity, damage + Math.floor(Math.random() * 20))
-      console.log(emit, hitPosition)
+      console.log(actions)
+
+      // Calculate actual damage with random variance
+      const actualDamage = damage + Math.floor(Math.random() * 20)
+
+      // Apply damage
+      damageEnemy(entity, actualDamage)
+
+      // Visual effects
       emit([x, y, z], 30)
       emitFlare([x, y, z], 10)
 
@@ -216,6 +223,7 @@ export function EnemyMesh({ entity }: EnemyMeshProps) {
       // Trigger camera shake (once per slash, handled in PlayerController)
       eventBus.emit(EVENTS.CAMERA_SHAKE)
       const playerPosition = useGameStore.getState().playerPosition
+
       // Calculate knockback direction: from attacker (player) toward enemy
       if (entity.has(Position)) {
         const enemyPos = entity.get(Position)!
@@ -229,9 +237,11 @@ export function EnemyMesh({ entity }: EnemyMeshProps) {
         if (knockbackDir.length() < 0.001) {
           knockbackDir.set(Math.random() - 0.5, 0, Math.random() - 0.5)
         }
+
         const ko = actions['knockback']?.reset().fadeIn(0.1).play()
         ko?.setEffectiveTimeScale(1.3)
         ko?.setLoop(THREE.LoopOnce, 1)
+
         // Apply knockback - push enemy away from the attacker
         knockback({
           direction: knockbackDir,
@@ -364,6 +374,7 @@ useGLTF.preload('/enemy.glb')
 /**
  * Queries all enemies and renders them
  * Also runs enemy systems in the frame loop
+ * Host broadcasts enemy state to clients
  */
 export function EnemyManager() {
   const world = useWorld()

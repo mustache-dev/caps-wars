@@ -82,7 +82,7 @@ export const enemyActions = createActions((world) => ({
     const entities = []
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2
-      const type: EnemyType = Math.random() > 0.5 ? 'melee' : 'range'
+      const type: EnemyType = 'range'
       const typeTag = type === 'melee' ? IsMeleeEnemy : IsRangeEnemy
 
       const entity = world.spawn(

@@ -52,7 +52,7 @@ export const TargetPosition = trait({ x: 0, y: 0, z: 0 })
 /** Target velocity for smooth steering (velocity damps toward this) */
 export const TargetVelocity = trait({ x: 0, y: 0, z: 0 })
 
-export const isSpawned = trait({value: false})
+export const isSpawned = trait({ value: false })
 
 // ============================================
 // VISUAL TRAITS
@@ -61,7 +61,7 @@ export const isSpawned = trait({value: false})
 /** Color for rendering */
 export const Color = trait({ r: 1, g: 0, b: 0 }) // Default red
 
-/** 
+/**
  * Reference to THREE.js mesh (use callback for non-serializable objects)
  * ⚠️ Must use callback syntax for class instances
  */

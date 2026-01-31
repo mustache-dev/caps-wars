@@ -1,6 +1,6 @@
 /**
  * Enemy ECS Module
- * 
+ *
  * Organized ECS pattern for enemy entities:
  * - traits.ts   → Data definitions (Position, Health, etc.)
  * - actions.ts  → Spawn/destroy/damage functions
@@ -45,9 +45,4 @@ export {
 } from './systems'
 
 // React Components
-export {
-  EnemyMesh,
-  EnemyManager,
-  WaveSpawner,
-  EnemySystem,
-} from './Enemy'
+export { EnemyMesh, EnemyManager, WaveSpawner, EnemySystem } from './Enemy'

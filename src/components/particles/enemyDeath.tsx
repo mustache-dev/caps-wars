@@ -1,14 +1,14 @@
 import { uv, vec2, vec4, step, float, color } from 'three/tsl'
 import { VFXParticles } from 'r3f-vfx'
-import { useVFXEmitter } from 'r3f-vfx'
 import { PlaneGeometry } from 'three/webgpu'
 import { useEffect, useMemo } from 'react'
 import { EVENTS, eventBus } from '@/constants'
+import { useVFXEmitter, PARTICLES } from './index'
 
 export const EnemyDeath = () => {
   const col = color('#fc6717')
-  const { emit } = useVFXEmitter('death')
-  const { emit: emitCircle } = useVFXEmitter('death-2')
+  const { emit } = useVFXEmitter(PARTICLES.DEATH)
+  const { emit: emitCircle } = useVFXEmitter(PARTICLES.DEATH_2)
 
   const colorNode = (progress: typeof float) => {
     const center = vec2(0.5)

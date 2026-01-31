@@ -110,7 +110,7 @@ export function faceMovementSystem(world: World) {
  */
 export function updateEnemySystems(world: World, delta: number) {
   wanderSystem(world)
-  velocityDampingSystem(world, delta) // Smooth velocity toward target
+  velocityDampingSystem(world, delta)
   movementSystem(world, delta)
   boundsSystem(world, 10)
   faceMovementSystem(world)

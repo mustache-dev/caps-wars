@@ -18,8 +18,7 @@ import {
   PARRY_COOLDOWN_MS,
 } from './types'
 import { eventBus, EVENTS } from '../constants'
-import { useVFXEmitter } from 'r3f-vfx'
-import { me } from 'playroomkit'
+import { useVFXEmitter, PARTICLES } from '../components/particles'
 
 const PARRY_SPEED = 2
 const ATTACK_DAMAGE = 10
@@ -47,7 +46,7 @@ export const useCapsController = ({
   const swordBoneRef = useRef<THREE.Bone | null>(null)
   const hitEntitiesRef = useRef<Set<string>>(new Set()) // Track entities hit during current attack
 
-  const { start, stop } = useVFXEmitter('energy')
+  const { start, stop } = useVFXEmitter(PARTICLES.ENERGY)
   // Store actions
   // Actions / setters (keep as selectors)
   const setIsCharging = useGameStore((s) => s.setIsCharging)
@@ -75,7 +74,7 @@ export const useCapsController = ({
   const animationParams = useRef({
     speed: 1,
     clamp: false,
-    loop: true
+    loop: true,
   })
 
   // ---------------------------------------------------------------------------
@@ -132,7 +131,7 @@ export const useCapsController = ({
     action.setLoop(THREE.LoopOnce, 1)
     action.setEffectiveTimeScale(SPIN_ATTACK_SPEED)
     action.clampWhenFinished = true
-    
+
     animationParams.current = { speed: SPIN_ATTACK_SPEED, clamp: true, loop: false }
 
     s.isAttacking = true
@@ -414,15 +413,6 @@ export const useCapsController = ({
       }
     } else if (!s.isParrying) {
       swordGlowUniform.value = THREE.MathUtils.lerp(currentGlow, 0, delta * 12)
-    }
-
-    if (me()) {
-      me().setState('animation', {
-        name: s.currentAnimation,
-        speed: animationParams.current.speed,
-        clamp: animationParams.current.clamp,
-        loop: animationParams.current.loop
-      })
     }
   })
 

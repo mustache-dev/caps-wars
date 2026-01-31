@@ -1,15 +1,14 @@
 import { Canvas } from '@react-three/fiber'
 import { Lights } from './components/lights'
-import { Html, KeyboardControls, OrbitControls, Preload, Stats } from '@react-three/drei'
+import { Html, KeyboardControls, Preload } from '@react-three/drei'
 import { PostProcessing } from './components/postprocessing'
-import { MultiplayerSystem } from './ecs/players'
 import { Floor } from './components/floor'
 import { HalfFloatType } from 'three'
 import { PlayerController } from './PlayerController'
 import { Particles } from './components/particles'
-import { PlayroomStarter } from './PlayroomStarter'
 import { Suspense } from 'react'
 import { EnemySystem } from './ecs/enemy'
+import { Bullets } from './components/bullets'
 
 function App() {
   const keyboardMap = [
@@ -40,19 +39,16 @@ function App() {
           <Floor />
           <Lights />
           <PostProcessing />
-          <Particles />
+          {/*<Particles />*/}
           {/*<OrbitControls /> */}
           <KeyboardControls map={keyboardMap}>
             <PlayerController />
           </KeyboardControls>
+          <Bullets />
 
-
-          <EnemySystem initialCount={10} spawnRadius={6} />
-          {/* <MultiplayerSystem /> Added MultiplayerSystem */}
-          {/*<Stats />*/}
+          {/*<EnemySystem initialCount={3} spawnRadius={6} />*/}
           <Preload all />
         </Suspense>
-        <PlayroomStarter />
       </Canvas>
     </>
   )

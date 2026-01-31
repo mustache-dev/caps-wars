@@ -5,7 +5,7 @@ import { useGLTF, useAnimations } from '@react-three/drei'
 import { SkeletonUtils } from 'three-stdlib'
 import type { ThreeElements } from '@react-three/fiber'
 import { useGameStore } from '../store'
-import { VFXEmitter } from 'r3f-vfx'
+import { VFXEmitter, PARTICLES } from '../components/particles'
 import type { GLTFResult, CapsHandle } from './types'
 import { createCapsMaterial, createSwordMaterial } from './materials'
 import { useCapsController } from './useCapsController'
@@ -92,7 +92,7 @@ export const Caps = forwardRef<CapsHandle, CapsProps>(({ ...props }, ref) => {
           <planeGeometry args={[0.5, 1.7]} />
           <meshStandardMaterial color="red" visible={false} />
           <VFXEmitter
-            name="sparks"
+            name={PARTICLES.SPARKS}
             ref={sparkEmitterRef}
             autoStart={false}
             position={[0, -0.2, 0]}
@@ -116,7 +116,7 @@ export const Caps = forwardRef<CapsHandle, CapsProps>(({ ...props }, ref) => {
       </group>
 
       <VFXEmitter
-        name="slash"
+        name={PARTICLES.SLASH}
         ref={slashEmitterRef}
         position={[0, 0, 0.6]}
         autoStart={false}
