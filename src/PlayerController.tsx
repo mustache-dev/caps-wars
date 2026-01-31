@@ -7,7 +7,7 @@ import gsap from "gsap"
 import { useGameStore } from "./store"
 import { Caps } from "./caps/index"
 import type { CapsHandle } from "./caps/index"
-import { VFXEmitter } from './components/VFXParticles'
+import { VFXEmitter } from 'r3f-vfx'
 import { resolvePosition, useCollisionStore, Layer } from './collision'
 import { eventBus, EVENTS } from './constants'
 import { me } from 'playroomkit'

@@ -1,4 +1,4 @@
-import { VFXParticles } from '../VFXParticles'
+import { VFXParticles } from 'r3f-vfx'
 import { SphereGeometry } from 'three/webgpu'
 import { TextureLoader } from 'three/webgpu'
 import { texture, uv, vec4 } from 'three/tsl'
@@ -74,7 +74,6 @@ export const Impact = () => {
           [0, 1],
           [-1, 1],
         ]}
-
         rotation={[
           [-Math.PI / 2, Math.PI / 2],
           [-Math.PI / 2, Math.PI / 2],

@@ -1,4 +1,4 @@
-import { VFXParticles } from '../VFXParticles'
+import { VFXParticles } from 'r3f-vfx'
 import { OctahedronGeometry } from 'three/webgpu'
 
 export const Spawn = () => {
@@ -7,7 +7,6 @@ export const Spawn = () => {
       <VFXParticles
         name="spawn"
         curveTexturePath="/vfx/spawn.bin"
-
         autoStart={false}
         geometry={new OctahedronGeometry(0.5, 1)}
         maxParticles={1000}

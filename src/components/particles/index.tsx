@@ -1,4 +1,4 @@
-import { VFXParticles } from '../VFXParticles'
+
 import { Dodge } from './dodge'
 import { EnemyDeath } from './enemyDeath'
 import { Energy } from './energy'

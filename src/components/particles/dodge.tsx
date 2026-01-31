@@ -1,4 +1,4 @@
-import { VFXParticles } from "../VFXParticles"
+import { VFXParticles } from "r3f-vfx"
 import { CapsuleGeometry } from "three/webgpu"
 export const Dodge = () => {
 
