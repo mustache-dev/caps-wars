@@ -1,12 +1,13 @@
 import { VFXParticles } from 'r3f-vfx'
 import { SphereGeometry } from 'three/webgpu'
+import { PARTICLES } from './index'
 
 export const Energy = () => {
   return (
     <>
       <VFXParticles
-        name="energy"
-        maxCount={200}
+        name={PARTICLES.ENERGY}
+        maxParticles={200}
         autoStart={false}
         intensity={10}
         size={[0.01, 0.07]}

@@ -2,13 +2,15 @@ import { VFXParticles } from 'r3f-vfx'
 import { SphereGeometry } from 'three/webgpu'
 import { TextureLoader } from 'three/webgpu'
 import { texture, uv, vec4 } from 'three/tsl'
+import { PARTICLES } from './index'
+
 export const Impact = () => {
   const flareTexture = new TextureLoader().load('/flare.png')
   return (
     <>
       <VFXParticles
         curveTexturePath="/vfx/impact.bin"
-        name="impact"
+        name={PARTICLES.IMPACT}
         autoStart={false}
         geometry={new SphereGeometry(0.5, 16, 12)}
         maxParticles={30}
@@ -54,7 +56,7 @@ export const Impact = () => {
         maxParticles={500}
         position={[0, 0, 0]}
         autoStart={false}
-        name="impact-flare"
+        name={PARTICLES.IMPACT_FLARE}
         emitCount={20}
         intensity={3}
         // delay={1}

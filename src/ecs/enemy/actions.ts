@@ -13,6 +13,8 @@ import {
   Color,
   MeshRef,
   isSpawned,
+  ShootTimer,
+  StunState,
 } from './traits'
 import { eventBus, EVENTS } from '@/constants'
 
@@ -53,7 +55,8 @@ export const enemyActions = createActions((world) => ({
     // Choose type tag based on enemy type
     const typeTag = type === 'melee' ? IsMeleeEnemy : IsRangeEnemy
 
-    const entity = world.spawn(
+    // Base traits common to all enemies
+    const baseTraits = [
       // Tags
       IsEnemy,
       typeTag,
@@ -66,11 +69,19 @@ export const enemyActions = createActions((world) => ({
       // Gameplay
       Health({ current: health, max: health }),
       Speed({ value: speed }),
+      StunState({ duration: 0 }),
       isSpawned({ value: false }),
       // Visuals
       Color(color),
-      MeshRef
-    )
+      MeshRef,
+    ]
+
+    // Add ShootTimer for range enemies
+    if (type === 'range') {
+      baseTraits.push(ShootTimer())
+    }
+
+    const entity = world.spawn(...baseTraits)
 
     return entity
   },
@@ -85,7 +96,7 @@ export const enemyActions = createActions((world) => ({
       const type: EnemyType = 'range'
       const typeTag = type === 'melee' ? IsMeleeEnemy : IsRangeEnemy
 
-      const entity = world.spawn(
+      const baseTraits = [
         IsEnemy,
         typeTag,
         Position({
@@ -99,9 +110,17 @@ export const enemyActions = createActions((world) => ({
         Scale({ x: 1, y: 1, z: 1 }),
         Health({ current: 100, max: 100 }),
         Speed({ value: 1 }),
+        StunState({ duration: 0 }),
         Color({ r: 1, g: 0.2, b: 0.2 }),
-        MeshRef
-      )
+        MeshRef,
+      ]
+
+      // Add ShootTimer for range enemies
+      if (type === 'range') {
+        baseTraits.push(ShootTimer())
+      }
+
+      const entity = world.spawn(...baseTraits)
       entities.push(entity)
     }
     return entities

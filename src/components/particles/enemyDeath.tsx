@@ -31,9 +31,9 @@ export const EnemyDeath = () => {
     <>
       <VFXParticles
         curveTexturePath="./vfx/death.bin"
-        name="death"
+        name={PARTICLES.DEATH}
         autoStart={false}
-        maxParticles={1000}
+        maxParticles={100}
         position={[0, 0, 0]}
         emitCount={100}
         delay={0.99}
@@ -77,7 +77,7 @@ export const EnemyDeath = () => {
       />
       <VFXParticles
         curveTexturePath="./vfx/death-2.bin"
-        name="death-2"
+        name={PARTICLES.DEATH_2}
         autoStart={false}
         geometry={new PlaneGeometry(1, 1, 1, 1)}
         maxParticles={10}

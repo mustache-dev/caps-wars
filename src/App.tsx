@@ -39,14 +39,14 @@ function App() {
           <Floor />
           <Lights />
           <PostProcessing />
-          {/*<Particles />*/}
+          <Particles />
           {/*<OrbitControls /> */}
           <KeyboardControls map={keyboardMap}>
             <PlayerController />
           </KeyboardControls>
           <Bullets />
 
-          {/*<EnemySystem initialCount={3} spawnRadius={6} />*/}
+          <EnemySystem initialCount={3} spawnRadius={6} />
           <Preload all />
         </Suspense>
       </Canvas>

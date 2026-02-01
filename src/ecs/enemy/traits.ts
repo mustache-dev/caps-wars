@@ -52,6 +52,15 @@ export const TargetPosition = trait({ x: 0, y: 0, z: 0 })
 /** Target velocity for smooth steering (velocity damps toward this) */
 export const TargetVelocity = trait({ x: 0, y: 0, z: 0 })
 
+/** Shoot timer for range enemies */
+export const ShootTimer = trait(() => ({
+  lastShot: Date.now(),
+  nextShot: 3000 + Math.random() * 2000, // 3-5 seconds
+}))
+
+/** Stun state - enemy can't move or shoot when stunned */
+export const StunState = trait({ duration: 0 })
+
 export const isSpawned = trait({ value: false })
 
 // ============================================

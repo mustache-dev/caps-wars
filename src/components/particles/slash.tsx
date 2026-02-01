@@ -17,6 +17,7 @@ import { noiseTexture } from '../textures/noiseTexture'
 import { useGLTF } from '@react-three/drei'
 import { voronoiTexture } from '../textures/voronoiTexture'
 import { VFXParticles } from 'r3f-vfx'
+import { PARTICLES } from './index'
 
 type GLTFResult = ReturnType<typeof useGLTF> & {
   nodes: { Cylinder: { geometry: THREE.BufferGeometry } }
@@ -133,7 +134,7 @@ export const Slash = () => {
       <VFXParticles
         autoStart={false}
         geometry={nodes.Cylinder.geometry}
-        name="slash"
+        name={PARTICLES.SLASH}
         maxParticles={10}
         position={[0, 0, 0]}
         delay={1}
@@ -141,7 +142,6 @@ export const Slash = () => {
         fadeSize={[0.9, 1]}
         colorStart={['#ffffff']}
         fadeOpacity={[1, 0]}
-
         speed={[0.1, 0.1]}
         lifetime={[0.4, 0.4]}
         friction={{
@@ -163,7 +163,7 @@ export const Slash = () => {
 
       <VFXParticles
         curveTexturePath="./vfx/slash-sparks.bin"
-        name="sparks"
+        name={PARTICLES.SPARKS}
         maxParticles={1000}
         position={[0, 0, 0]}
         autoStart={false}
@@ -184,7 +184,6 @@ export const Slash = () => {
           [0, 1],
           [-1, 1],
         ]}
-
         appearance="gradient"
         blending={1}
         lighting="basic"

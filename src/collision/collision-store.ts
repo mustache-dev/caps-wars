@@ -10,7 +10,7 @@ export const Layer = {
   OBSTACLE: 'obstacle',
 } as const
 
-export type LayerType = typeof Layer[keyof typeof Layer]
+export type LayerType = (typeof Layer)[keyof typeof Layer]
 
 // ============================================================================
 // Simple Collider Registry
@@ -39,7 +39,7 @@ interface CollisionStore {
 
 export const useCollisionStore = create<CollisionStore>((set, get) => ({
   colliders: new Map(),
-  
+
   registerCollider: (collider) => {
     set((state) => {
       const newMap = new Map(state.colliders)
@@ -47,7 +47,7 @@ export const useCollisionStore = create<CollisionStore>((set, get) => ({
       return { colliders: newMap }
     })
   },
-  
+
   unregisterCollider: (id) => {
     set((state) => {
       const newMap = new Map(state.colliders)
@@ -55,7 +55,7 @@ export const useCollisionStore = create<CollisionStore>((set, get) => ({
       return { colliders: newMap }
     })
   },
-  
+
   updateCollider: (id, x, z) => {
     const collider = get().colliders.get(id)
     if (collider) {
@@ -63,10 +63,10 @@ export const useCollisionStore = create<CollisionStore>((set, get) => ({
       collider.z = z
     }
   },
-  
+
   getColliders: () => Array.from(get().colliders.values()),
-  
-  getCollider: (id) => get().colliders.get(id)
+
+  getCollider: (id) => get().colliders.get(id),
 }))
 
 // ============================================================================
@@ -79,9 +79,11 @@ const shouldCollide = (myLayer: LayerType, otherLayer: LayerType): boolean => {
   if (myLayer === Layer.PLAYER) {
     return otherLayer === Layer.ENEMY || otherLayer === Layer.OBSTACLE
   }
-  // Enemies only collide with player and obstacles, NOT each other
+  // Enemies collide with player, obstacles, AND other enemies
   if (myLayer === Layer.ENEMY) {
-    return otherLayer === Layer.PLAYER || otherLayer === Layer.OBSTACLE
+    return (
+      otherLayer === Layer.PLAYER || otherLayer === Layer.OBSTACLE || otherLayer === Layer.ENEMY
+    )
   }
   // Obstacles collide with everyone
   if (myLayer === Layer.OBSTACLE) {
@@ -98,35 +100,35 @@ export const checkCircleCollision = (
   myLayer: LayerType
 ): { hit: boolean; pushX: number; pushZ: number } => {
   const colliders = useCollisionStore.getState().getColliders()
-  
+
   let totalPushX = 0
   let totalPushZ = 0
   let hasHit = false
-  
+
   for (const other of colliders) {
     if (other.id === myId) continue
     if (!other.solid) continue
     if (!shouldCollide(myLayer, other.layer)) continue
-    
+
     const dx = x - other.x
     const dz = z - other.z
     const distSq = dx * dx + dz * dz
     const minDist = radius + other.radius
-    
+
     if (distSq < minDist * minDist && distSq > 0.0001) {
       hasHit = true
       const dist = Math.sqrt(distSq)
       const overlap = minDist - dist
-      
+
       // Push direction (normalized)
       const nx = dx / dist
       const nz = dz / dist
-      
+
       totalPushX += nx * overlap
       totalPushZ += nz * overlap
     }
   }
-  
+
   return { hit: hasHit, pushX: totalPushX, pushZ: totalPushZ }
 }
 
@@ -141,14 +143,14 @@ export const resolvePosition = (
   myLayer: LayerType = Layer.PLAYER
 ): { x: number; z: number } => {
   const result = checkCircleCollision(targetX, targetZ, radius, myId, myLayer)
-  
+
   if (result.hit) {
     return {
       x: targetX + result.pushX,
-      z: targetZ + result.pushZ
+      z: targetZ + result.pushZ,
     }
   }
-  
+
   return { x: targetX, z: targetZ }
 }
 
@@ -175,25 +177,25 @@ export const checkHitbox = (
 ): HitResult[] => {
   const colliders = useCollisionStore.getState().getColliders()
   const hits: HitResult[] = []
-  
+
   for (const other of colliders) {
     if (other.id === excludeId) continue
     if (other.layer !== targetLayer) continue
-    
+
     const dx = x - other.x
     const dz = z - other.z
     const distSq = dx * dx + dz * dz
     const minDist = radius + other.radius
-    
+
     if (distSq < minDist * minDist) {
       hits.push({
         id: other.id,
         collider: other,
-        distance: Math.sqrt(distSq)
+        distance: Math.sqrt(distSq),
       })
     }
   }
-  
+
   // Sort by distance (closest first)
   return hits.sort((a, b) => a.distance - b.distance)
 }
@@ -215,21 +217,21 @@ export const dealDamageInArea = (
 ): string[] => {
   const hits = checkHitbox(x, z, radius, Layer.ENEMY, attackerId)
   const newHitIds: string[] = []
-  
+
   for (const hit of hits) {
     // Skip if already hit in this attack
     if (alreadyHit?.has(hit.id)) continue
-    
+
     // Calculate hit position (at the enemy's position, sword height)
     const hitPosition: HitPosition = {
       x: hit.collider.x,
       y: hitY,
-      z: hit.collider.z
+      z: hit.collider.z,
     }
-    
+
     hit.collider.onHit?.(attackerId, damage, hitPosition)
     newHitIds.push(hit.id)
   }
-  
+
   return newHitIds
 }

@@ -7,12 +7,16 @@ import { Spawn } from './spawn'
 import { BoxGeometry } from 'three'
 import { useVFXEmitter as useVFXEmitterOriginal, VFXEmitter as VFXEmitterOriginal } from 'r3f-vfx'
 import type { VFXEmitterProps as VFXEmitterPropsOriginal } from 'r3f-vfx'
+import { Bullets } from './bullets'
 
 export const PARTICLES = {
   SLASH: 'slash',
   SPARKS: 'sparks',
   DODGE: 'dodge',
   DODGE_SPARKS: 'dodge-sparks',
+  BULLET_SPARKS: 'bullet-sparks',
+  BULLET_ENERGY: 'bullet-energy',
+  BULLET_FLARE: 'bullet-flare',
   IMPACT: 'impact',
   IMPACT_FLARE: 'impact-flare',
   SPAWN: 'spawn',
@@ -54,6 +58,7 @@ export const Particles = () => {
       <Spawn />
       <EnemyDeath />
       <Energy />
+      <Bullets />
     </>
   )
 }

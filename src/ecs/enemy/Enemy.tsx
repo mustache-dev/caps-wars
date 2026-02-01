@@ -1,7 +1,7 @@
 import { useRef, useEffect, useCallback, useMemo } from 'react'
 import { useFrame, useGraph } from '@react-three/fiber'
 import { useQuery, useWorld, useActions, useTrait } from 'koota/react'
-import * as THREE from 'three'
+import * as THREE from 'three/webgpu'
 import gsap from 'gsap'
 import type { Entity } from 'koota'
 import { useGLTF, useAnimations } from '@react-three/drei'
@@ -17,6 +17,7 @@ import {
   MeshRef,
   Health,
   isSpawned,
+  StunState,
 } from './traits'
 import { enemyActions } from './actions'
 import { updateEnemySystems } from './systems'
@@ -29,6 +30,7 @@ import { createEnemyCapsMaterial } from './material'
 import { damp } from 'three/src/math/MathUtils.js'
 import { eventBus, EVENTS } from '@/constants'
 import { useWaveManager } from '@/wave'
+import { VFXEmitter } from 'r3f-vfx'
 
 // GLTF types for enemy model
 type GLTFResult = {
@@ -65,6 +67,9 @@ type KnockbackConfig = {
 
 interface EnemyMeshProps {
   entity: Entity
+  scene: THREE.Group
+  animations: THREE.AnimationClip[]
+  baseMaterials: GLTFResult['materials']
 }
 
 const ENEMY_COLLISION_RADIUS = 0.5
@@ -74,14 +79,15 @@ const ENEMY_COLLISION_RADIUS = 0.5
  * Syncs with ECS traits reactively
  * Registers with collision system for sword hit detection
  */
-export function EnemyMesh({ entity }: EnemyMeshProps) {
+export function EnemyMesh({ entity, scene, animations, baseMaterials }: EnemyMeshProps) {
   const groupRef = useRef<THREE.Group>(null!)
+  const cannonTipRef = useRef<THREE.Group>(null!)
+  const gatherEnergyRef = useRef<typeof VFXEmitter>(null!)
   const { damageEnemy } = useActions(enemyActions) // Bind actions to world
 
-  // Load enemy model
-  const { scene, animations } = useGLTF('/enemy.glb')
+  // Clone the shared scene for this instance
   const clone = useMemo(() => SkeletonUtils.clone(scene), [scene])
-  const { nodes, materials } = useGraph(clone) as unknown as GLTFResult
+  const { nodes } = useGraph(clone) as unknown as GLTFResult
   const { actions } = useAnimations(animations, groupRef)
 
   // Collision store
@@ -102,6 +108,40 @@ export function EnemyMesh({ entity }: EnemyMeshProps) {
   // Check enemy type
   const isMelee = entity.has(IsMeleeEnemy)
   const isRange = entity.has(IsRangeEnemy)
+
+  // Charge and shoot sequence for range enemies
+  const isChargingRef = useRef(false)
+  const chargeTimeRef = useRef(0)
+
+  const shoot = useCallback(() => {
+    if (!isRange || !cannonTipRef.current || isChargingRef.current) return
+
+    // Start charging sequence
+    isChargingRef.current = true
+    chargeTimeRef.current = 0
+  }, [isRange])
+
+  // Complete the shot after charging
+  const completeShot = useCallback(() => {
+    if (!isRange || !cannonTipRef.current) return
+
+    const position = cannonTipRef.current.getWorldPosition(new THREE.Vector3())
+    const quat = cannonTipRef.current.getWorldQuaternion(new THREE.Quaternion())
+
+    // Play attack animation
+    const attackAction = actions['attack02.001']
+    if (attackAction) {
+      attackAction.reset().fadeIn(0.1).play()
+      attackAction.setLoop(THREE.LoopOnce, 1)
+    }
+
+    // Emit the actual bullet
+    eventBus.emit(EVENTS.SHOOT, position, quat)
+
+    // Reset charging state
+    isChargingRef.current = false
+    chargeTimeRef.current = 0
+  }, [isRange, actions])
 
   // Create material with its own hit uniform (per-instance)
   const hitUniformRef = useRef<{ value: number } | null>(null)
@@ -142,6 +182,22 @@ export function EnemyMesh({ entity }: EnemyMeshProps) {
       actions['stance']?.reset().fadeIn(0.1).play()
     }
   }, [actions])
+
+  // Listen for enemy attack events to trigger shooting
+  useEffect(() => {
+    if (!isRange) return
+
+    const handleEnemyAttack = (attackingEntityId: number) => {
+      if (attackingEntityId === entity.id()) {
+        shoot()
+      }
+    }
+
+    eventBus.on(EVENTS.ENEMY_ATTACK, handleEnemyAttack)
+    return () => {
+      eventBus.off(EVENTS.ENEMY_ATTACK, handleEnemyAttack)
+    }
+  }, [entity, isRange, shoot])
 
   // Knockback state
   const isKnockedBack = useRef(false)
@@ -210,6 +266,9 @@ export function EnemyMesh({ entity }: EnemyMeshProps) {
 
       // Apply damage
       damageEnemy(entity, actualDamage)
+
+      // Apply stun for 0.5 seconds
+      entity.set(StunState, { duration: 0.5 })
 
       // Visual effects
       emit([x, y, z], 30)
@@ -280,6 +339,31 @@ export function EnemyMesh({ entity }: EnemyMeshProps) {
     if (hitUniformRef.current) {
       hitUniformRef.current.value = damp(hitUniformRef.current.value, 0, 7, delta)
     }
+
+    // Handle charging sequence for range enemies
+    if (isRange && isChargingRef.current && gatherEnergyRef.current) {
+      chargeTimeRef.current += delta
+
+      const CHARGE_DURATION = 0.5
+      const PAUSE_DURATION = 0.5
+      const TOTAL_DURATION = CHARGE_DURATION + PAUSE_DURATION
+
+      if (chargeTimeRef.current <= CHARGE_DURATION) {
+        // Phase 1: Charging (0 to 0.5s) - emit with lifetime from 1 to 0.1
+        const progress = chargeTimeRef.current / CHARGE_DURATION
+        const lifetime = 1 - progress * 0.9 // Goes from 1 to 0.1
+
+        gatherEnergyRef.current.emit({
+          lifetime,
+        })
+      } else if (chargeTimeRef.current <= TOTAL_DURATION) {
+        // Phase 2: Pause (0.5s to 1s) - no emission
+        // Just waiting...
+      } else {
+        // Phase 3: Fire!
+        completeShot()
+      }
+    }
   })
 
   // Store mesh ref in ECS for system access
@@ -323,7 +407,7 @@ export function EnemyMesh({ entity }: EnemyMeshProps) {
               <skinnedMesh
                 name="Sphere001_1"
                 geometry={nodes.Sphere001_1.geometry}
-                material={materials['Material.001']}
+                material={baseMaterials['Material.001']}
                 skeleton={nodes.Sphere001_1.skeleton}
                 castShadow
                 receiveShadow
@@ -351,11 +435,18 @@ export function EnemyMesh({ entity }: EnemyMeshProps) {
               <skinnedMesh
                 name="Sphere002_1"
                 geometry={nodes.Sphere002_1.geometry}
-                material={materials['Material.003']}
+                material={baseMaterials['Material.003']}
                 skeleton={nodes.Sphere002_1.skeleton}
                 castShadow
                 receiveShadow
               />
+              <group ref={cannonTipRef} position={[1.4, 0, -3]}>
+                <VFXEmitter
+                  ref={gatherEnergyRef}
+                  name={PARTICLES.BULLET_ENERGY}
+                  autoStart={false}
+                />
+              </group>
             </group>
           </group>
         </group>
@@ -380,6 +471,12 @@ export function EnemyManager() {
   const world = useWorld()
   const enemies = useQuery(IsEnemy)
 
+  // Load enemy model once for all enemies
+  const { scene, animations } = useGLTF('/enemy.glb')
+
+  // Parse the base scene graph once (useGraph is a hook, must be called at top level)
+  const baseGraph = useGraph(scene) as unknown as GLTFResult
+
   // Run enemy systems every frame
   useFrame((_, delta) => {
     updateEnemySystems(world, delta)
@@ -388,7 +485,13 @@ export function EnemyManager() {
   return (
     <>
       {enemies.map((entity) => (
-        <EnemyMesh key={entity.id()} entity={entity} />
+        <EnemyMesh
+          key={entity.id()}
+          entity={entity}
+          scene={scene}
+          animations={animations}
+          baseMaterials={baseGraph.materials}
+        />
       ))}
     </>
   )
